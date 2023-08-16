@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+
 @RestController
 @RequestMapping(value = "/api/products")
 public class ProductController {
@@ -34,7 +38,13 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductModel>> getAll() {
-       return ResponseEntity.status(HttpStatus.OK).body(service.getAll());
+
+       List<ProductModel> productList = service.getAll();
+       productList.forEach(p -> {
+           p.add(linkTo(methodOn(ProductController.class).getById(p.getId())).withSelfRel());
+       });
+
+       return ResponseEntity.status(HttpStatus.OK).body(productList);
     }
 
     @GetMapping(value = "/{id}")
